@@ -40,16 +40,18 @@ export function creerArbre() {
     const visible = Math.min(1, Math.max(0, croissance * (maxProfondeur + 1) - s.profondeur));
     if (visible <= 0) return;
     let angle = s.angle;
-    if (s.sens > 0 && souris) {
+    // Racines et branches se tendent vers le curseur, d'autant plus qu'elles sont fines.
+    if (souris && s.profondeur > 0) {
       const vers = Math.atan2(souris.y - y, souris.x - x);
       const d = Math.atan2(Math.sin(vers - angle), Math.cos(vers - angle));
-      const proximite = Math.max(0, 1 - Math.hypot(souris.x - x, souris.y - y) / 420);
-      angle += Math.max(-0.5, Math.min(0.5, d)) * proximite * (s.profondeur / 6);
+      const proximite = Math.max(0, 1 - Math.hypot(souris.x - x, souris.y - y) / (unite * 6));
+      const souplesse = s.sens > 0 ? 0.5 : 0.42;
+      angle += Math.max(-souplesse, Math.min(souplesse, d)) * proximite * (s.profondeur / 6);
     }
     const l = s.longueur * unite * visible;
     const x2 = x + Math.cos(angle) * l;
     const y2 = y + Math.sin(angle) * l;
-    ctx.lineWidth = Math.max(3, (s.sens > 0 ? 10 : 12) * Math.pow(0.72, s.profondeur));
+    ctx.lineWidth = Math.max(3, (s.sens > 0 ? 12 : 15) * Math.pow(0.72, s.profondeur));
     ctx.strokeStyle = gris(s.sens > 0 ? 0.85 : 1);
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -65,16 +67,16 @@ export function creerArbre() {
     },
 
     sol() {
-      return zone.y + zone.h * 0.42;
+      return zone.y + zone.h * 0.56;
     },
 
     dessiner(ctx, croissance, souris, t) {
       positions.clear();
       const x = zone.x + zone.l / 2;
-      const y = zone.y + zone.h * 0.42;
+      const y = zone.y + zone.h * 0.56;
       const unite = zone.h / 10;
       ctx.lineCap = 'round';
-      tracer(ctx, tronc, x, y, Math.min(1, croissance * 1.4), null, unite * 0.62, 6);
+      tracer(ctx, tronc, x, y, Math.min(1, croissance * 1.4), souris, unite * 0.66, 6);
       tracer(ctx, racine, x, y, croissance, souris, unite * 0.85, 6);
       ctx.strokeStyle = gris(0.6);
       ctx.lineWidth = 3;
@@ -85,7 +87,7 @@ export function creerArbre() {
       ctx.fillStyle = gris(0.3);
       const grains = aleatoire(3);
       for (let k = 0; k < 120; k++) {
-        ctx.fillRect(zone.x + grains() * zone.l, y + 8 + grains() * zone.h * 0.6, 4, 4 + Math.sin(t + k) * 2);
+        ctx.fillRect(zone.x + grains() * zone.l, y + 8 + grains() * zone.h * 0.4, 4, 4 + Math.sin(t + k) * 2);
       }
       ctx.lineCap = 'butt';
     },

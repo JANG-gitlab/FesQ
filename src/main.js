@@ -111,7 +111,6 @@ let prochainLog = 0;
 let prochainEclair = 0;
 let prochainDonnees = 0;
 let prochaineRumeur = 0;
-let parcouru = 0;
 let derniereEtape = 0;
 let precedentP = 0;
 
@@ -248,8 +247,8 @@ function dessinerSource(panneaux, etoile, p, t) {
   const racines = etatChapitre(3, p);
   if (racines.presence > 0) {
     const d = decalageVisuel(3, p);
-    const l = compact() ? W * 0.84 : W * 0.4;
-    const h = compact() ? H * 0.38 : H * 0.72;
+    const l = compact() ? W * 0.94 : W * 0.52;
+    const h = compact() ? H * 0.5 : H * 0.96;
     arbre.placer({ x: W * (0.5 + d.x) - l / 2, y: H * (0.5 + d.y) - h / 2, l, h });
     ctx.globalAlpha = racines.presence;
     arbre.dessiner(ctx, lisser(4.12, 4.78, p), etat.survolLien ? null : souris(), t);
@@ -445,7 +444,7 @@ addEventListener('pointerup', () => {
   if (etat.charge > 0.3) {
     const etoile = etoileCourante(defilement.position);
     for (let i = 0; i < 6; i++) eclairs.push({ points: genererEclair(etoile), fin: performance.now() / 1000 + 0.25 });
-    son.decharge();
+    son.liberation(etat.charge);
     glitcher(0.35);
   }
   gsap.to(etat, { charge: 0, duration: 0.8, ease: 'power2.out', onUpdate: () => son.charge(etat.charge) });
@@ -477,11 +476,6 @@ renderer.setAnimationLoop((ms) => {
 
   const p = defilement.mettreAJour(dt);
   son.flux(defilement.vitesse);
-  parcouru += Math.abs(p - precedentP);
-  if (parcouru > 0.025) {
-    parcouru = 0;
-    son.relais();
-  }
   const etape = Math.floor(p);
   if (etape !== derniereEtape) {
     if (etape > 0 || derniereEtape > 0) son.impact();

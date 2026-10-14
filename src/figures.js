@@ -1,11 +1,16 @@
 import {
-  AnimationMixer, AnimationUtils, DirectionalLight, Fog, HemisphereLight, LinearFilter, LoopOnce,
-  MeshLambertMaterial, PerspectiveCamera, Scene, Vector3, WebGLRenderTarget,
+  AnimationMixer, AnimationUtils, Fog, LinearFilter, LoopOnce,
+  MeshBasicMaterial, PerspectiveCamera, Scene, Vector3, WebGLRenderTarget,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 
 const PLACE = { x: 6.5, z: 4.5 };
+// Le cycle de marche avance à 1,72 m/s : 0,58 s de cycle par mètre parcouru, pieds posés au sol.
+const FOULEE = 0.58;
+const VITESSE_MARCHE = 1.15;
+const VITESSE_MAX = 1.9;
+const ACCELERATION = 2.4;
 const VOIES = Array.from({ length: 22 }, (_, i) => {
   const a = i * 2.39996 + 0.3;
   return {
@@ -27,10 +32,6 @@ function boucler(v, demi) {
 export function creerFigures() {
   const scene = new Scene();
   scene.fog = new Fog(0x000000, 8, 14);
-  scene.add(new HemisphereLight(0xffffff, 0x666666, 2.6));
-  const soleil = new DirectionalLight(0xffffff, 2);
-  soleil.position.set(-3, 6, 5);
-  scene.add(soleil);
 
   const camera = new PerspectiveCamera(32, 1, 0.1, 60);
   const cote = { position: new Vector3(0, 1.25, 9), cible: new Vector3(0, 0.95, 0) };
@@ -42,12 +43,15 @@ export function creerFigures() {
   let sujet = null;
   let taille = { l: 1, h: 1 };
 
-  new GLTFLoader().load(new URL('modeles/silhouette.glb', document.baseURI).href, (gltf) => {
+  new GLTFLoader().load(new URL('modeles/humain.glb', document.baseURI).href, (gltf) => {
     const clip = (nom) => gltf.animations.find((a) => a.name === nom);
     const refus = AnimationUtils.makeClipAdditive(clip('headShake').clone());
     const creer = (voie) => {
       const racine = clone(gltf.scene);
-      const m = { racine, voie, matiere: new MeshLambertMaterial({ color: 0xffffff, transparent: true }), arret: 0, suspect: false, opacite: 0 };
+      const m = {
+        racine, voie, matiere: new MeshBasicMaterial({ color: 0xffffff, transparent: true, fog: true }),
+        arret: 0, suspect: false, opacite: 0, x: 2.6, vitesse: 0, cap: -Math.PI / 2, parcours: 0, allure: 0,
+      };
       racine.traverse((o) => {
         if (o.isMesh) {
           o.material = m.matiere;
@@ -59,7 +63,9 @@ export function creerFigures() {
       m.repos = m.mixer.clipAction(clip('idle'));
       m.refus = m.mixer.clipAction(refus);
       m.refus.setLoop(LoopOnce, 1);
+      m.marche.timeScale = 0;
       m.marche.play();
+      m.repos.play();
       scene.add(racine);
       marcheurs.push(m);
       return m;
@@ -68,32 +74,45 @@ export function creerFigures() {
     for (const voie of VOIES) creer(voie);
   });
 
-  function placer(m, p) {
-    let distance;
-    let x;
-    let z;
-    let dx;
-    let dz;
-    if (m === sujet) {
-      distance = Math.max(0, p - 0.95) * 5;
-      x = 2.6 - distance;
-      z = 0.8;
-      dx = -1;
-      dz = 0;
-    } else {
-      distance = p * 9 * m.voie.vitesse;
-      x = boucler(m.voie.depart.x + m.voie.direction.x * distance, PLACE.x);
-      z = boucler(m.voie.depart.z + m.voie.direction.z * distance, PLACE.z);
-      dx = m.voie.direction.x;
-      dz = m.voie.direction.z;
+  function tourner(m, cap, k) {
+    const d = cap - m.racine.rotation.y;
+    m.racine.rotation.y += Math.atan2(Math.sin(d), Math.cos(d)) * k;
+  }
+
+  // Le sujet marche vers la position voulue par le défilement, à allure humaine.
+  function placerSujet(m, p, dt) {
+    const voulu = 2.6 - Math.max(0, p - 0.95) * 5;
+    if (m.opacite < 0.01) {
+      m.x = voulu;
+      m.vitesse = 0;
     }
+    if (Math.abs(voulu - m.x) > 4) m.x = voulu - Math.sign(voulu - m.x) * 4;
+    const ecart = voulu - m.x;
+    const desiree = m.arret > 0 ? 0 : Math.max(-VITESSE_MAX, Math.min(VITESSE_MAX, ecart * 2.2));
+    const dv = desiree - m.vitesse;
+    m.vitesse += Math.max(-ACCELERATION * dt, Math.min(ACCELERATION * dt, dv));
+    if (Math.abs(ecart) < 0.004 && Math.abs(m.vitesse) < 0.05) m.vitesse = 0;
+    m.x += m.vitesse * dt;
+    m.racine.position.set(m.x, 0, 0.8);
+    m.bord = 1;
+    const allure = Math.abs(m.vitesse);
+    if (allure > 0.05) m.cap = m.vitesse < 0 ? -Math.PI / 2 : Math.PI / 2;
+    const cap = m.arret > 0 ? Math.atan2(camera.position.x - m.x, camera.position.z - 0.8) : m.cap;
+    tourner(m, cap, Math.min(1, dt * (m.arret > 0 ? 5 : 7)));
+    return allure;
+  }
+
+  // La foule marche en continu, chacun à son rythme, sans dépendre du défilement.
+  function placerFoule(m, dt) {
+    const allure = m.arret > 0 ? 0 : VITESSE_MARCHE * m.voie.vitesse;
+    m.parcours += allure * dt;
+    const x = boucler(m.voie.depart.x + m.voie.direction.x * m.parcours, PLACE.x);
+    const z = boucler(m.voie.depart.z + m.voie.direction.z * m.parcours, PLACE.z);
     m.racine.position.set(x, 0, z);
-    const bord = Math.min(PLACE.x - Math.abs(x), PLACE.z - Math.abs(z));
-    m.bord = m === sujet ? 1 : lisser(0, 1.2, bord);
-    const direction = m.arret > 0 ? Math.atan2(camera.position.x - x, camera.position.z - z) : Math.atan2(dx, dz);
-    const d = direction - m.racine.rotation.y;
-    m.racine.rotation.y += Math.atan2(Math.sin(d), Math.cos(d)) * (m.arret > 0 ? 0.08 : 1);
-    return distance;
+    m.bord = lisser(0, 1.2, Math.min(PLACE.x - Math.abs(x), PLACE.z - Math.abs(z)));
+    const cap = m.arret > 0 ? Math.atan2(camera.position.x - x, camera.position.z - z) : Math.atan2(m.voie.direction.x, m.voie.direction.z);
+    tourner(m, cap, m.arret > 0 ? Math.min(1, dt * 5) : 1);
+    return allure;
   }
 
   function versEcran(v) {
@@ -141,17 +160,20 @@ export function creerFigures() {
 
       const sortie = 1 - lisser(2.75, 3.05, p);
       const foule = lisser(1.75, 2.1, p) * sortie;
+      const pas = anime ? dt : 0;
       for (const m of marcheurs) {
-        if (anime && m.arret > 0) {
-          m.arret = Math.max(0, m.arret - dt);
-          if (m.arret === 0) {
-            m.repos.fadeOut(0.5);
-            m.marche.reset().fadeIn(0.5).play();
-          }
+        if (m.arret > 0) {
+          m.arret = Math.max(0, m.arret - pas);
+          if (m.arret === 0) m.refus.stop();
         }
-        const distance = placer(m, p);
-        if (m.arret === 0) m.marche.time = distance * 0.95;
-        m.mixer.update(m.arret > 0 && anime ? dt : 0);
+        const allure = m === sujet ? placerSujet(m, p, dt) : placerFoule(m, pas);
+        // Le cycle avance de la distance réellement parcourue : pas de glissement des pieds.
+        const cycle = m.marche.getClip().duration;
+        m.marche.time = (m.marche.time + allure * FOULEE * dt) % cycle;
+        m.allure += (lisser(0.05, 0.45, allure) - m.allure) * Math.min(1, dt * 8);
+        m.marche.setEffectiveWeight(m.allure);
+        m.repos.setEffectiveWeight(1 - m.allure);
+        m.mixer.update(pas);
         m.opacite = (m === sujet ? lisser(0.85, 1.1, p) * sortie : foule) * m.bord;
         m.matiere.opacity = m.opacite;
         m.racine.visible = m.opacite > 0.01;
@@ -174,8 +196,6 @@ export function creerFigures() {
     regarder(m) {
       if (m.arret > 0) return false;
       m.arret = 3.4;
-      m.marche.fadeOut(0.4);
-      m.repos.reset().fadeIn(0.4).play();
       m.refus.reset().play();
       return true;
     },

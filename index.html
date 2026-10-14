@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vigie</title>
+  <meta name="description" content="Vigie, agence de développement spécialisée en cybersécurité : audit de code, tests d'intrusion, développement sécurisé et réponse à incident.">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Cpath d='M16 3Q17.5 14.5 27 16Q17.5 17.5 16 29Q14.5 17.5 5 16Q14.5 14.5 16 3Z' fill='%23c4001a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <canvas id="ecran" aria-hidden="true"></canvas>
+
+  <header class="calque">
+    <h1>Vigie</h1>
+    <p data-role="sous-titre">développement sécurisé · défense applicative</p>
+    <nav aria-label="Chapitres">
+      <a href="#accueil">accueil</a>
+      <a href="#surveillance">surveillance</a>
+      <a href="#mutation">mutation</a>
+      <a href="#racines">racines</a>
+      <a href="#contact">contact</a>
+    </nav>
+    <button type="button" data-role="son" aria-pressed="true">son</button>
+  </header>
+
+  <main class="defile">
+    <section id="accueil">
+      <h2>Quelqu'un est déjà entré.</h2>
+      <p>Il ne force rien. Il a un identifiant valide, il connaît vos horaires, il marche lentement. Vigie conçoit des applications qui le remarquent.</p>
+      <p data-role="consigne">Cliquez sur lui.</p>
+    </section>
+    <section id="surveillance">
+      <h2>Surveiller tout le monde ne protège personne.</h2>
+      <p>La surveillance de masse noie le signal dans la foule. Nous écrivons le code qui repère celui qui ne devrait pas être là, sans fouiller les autres.</p>
+      <p data-role="consigne">Cliquez sur une silhouette pour la signaler.</p>
+    </section>
+    <section id="mutation">
+      <h2>Il mute plus vite que vos mises à jour.</h2>
+      <p>Les menaces modernes se comportent comme des organismes : elles se copient, se cachent, s'adaptent. Nous les isolons avant qu'elles ne se divisent.</p>
+      <p data-role="consigne">Faites défiler pour le faire tourner.</p>
+    </section>
+    <section id="racines">
+      <h2>Nous creusons jusqu'à la racine.</h2>
+      <p>Chaque faille a une origine, souvent loin sous la surface. Nous la suivons jusqu'au bout.</p>
+      <ul>
+        <li>Audit de code</li>
+        <li>Tests d'intrusion</li>
+        <li>Développement sécurisé</li>
+        <li>Réponse à incident</li>
+      </ul>
+      <p data-role="consigne">Approchez le curseur, les racines le suivent.</p>
+    </section>
+    <section id="contact">
+      <h2>Avant qu'il ne frappe.</h2>
+      <p>Un projet, un doute, une alerte en cours : écrivez-nous, réponse sous une heure.</p>
+      <p><a href="mailto:contact@vigie.example">contact@vigie.example</a></p>
+      <p>Site conçu par <a href="https://jeanf.alwaysdata.net">Jean F.</a></p>
+      <p data-role="consigne">Maintenez le clic pour charger l'étoile.</p>
+    </section>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

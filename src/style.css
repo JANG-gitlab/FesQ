@@ -1,0 +1,82 @@
+:root {
+  color-scheme: dark;
+  --rouge: #c4001a;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+html {
+  background: #000;
+}
+
+html.vise {
+  cursor: crosshair;
+}
+
+body {
+  margin: 0;
+  background: #000;
+}
+
+#ecran {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+.calque,
+.defile {
+  color: transparent;
+  font: 10px/1 monospace;
+  user-select: none;
+  pointer-events: none;
+}
+
+.calque {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.defile {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.calque a,
+.calque button,
+.defile a {
+  position: fixed;
+  display: block;
+  color: transparent;
+  outline: none;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+a.place,
+button.place {
+  pointer-events: auto;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 1px solid var(--rouge);
+  outline-offset: 3px;
+}

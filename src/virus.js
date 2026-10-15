@@ -84,9 +84,9 @@ export function creerVirus() {
   let taille = { l: 1, h: 1 };
 
   const reperes = [
-    { local: points[11].clone().multiplyScalar(1.38), nom: 'PIÈCE JOINTE', note: 'sa porte d’entrée' },
-    { local: new Vector3(0.62, -0.55, 0.56).normalize().multiplyScalar(1.0), nom: 'CAMOUFLAGE', note: 'imite un fichier sûr' },
-    { local: new Vector3(-0.35, -0.2, 0.92).normalize().multiplyScalar(0.5), nom: 'CHARGE UTILE', note: 'vole et se recopie' },
+    { local: points[11].clone().multiplyScalar(1.38), nom: 'ATTACHMENT', note: 'its way in' },
+    { local: new Vector3(0.62, -0.55, 0.56).normalize().multiplyScalar(1.0), nom: 'DISGUISE', note: 'looks like a safe file' },
+    { local: new Vector3(-0.35, -0.2, 0.92).normalize().multiplyScalar(0.5), nom: 'PAYLOAD', note: 'steals, copies itself' },
   ];
 
   return {

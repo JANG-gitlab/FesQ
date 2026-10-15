@@ -75,6 +75,14 @@ float glypheGrand(float indice, vec2 local, float niveau) {
   return textureLod(uAtlasGrand, vec2((place.x + local.x) / uColonnesAtlas, 1.0 - (place.y + local.y) / lignes), niveau).r;
 }
 
+// Présence floutée des formes (arbre, étoile, silhouettes, virus) via les mipmaps.
+float densite(vec2 f, float niveau) {
+  vec4 s = textureLod(uSource, f, niveau);
+  float fig = min(1.0, textureLod(uFigure, f, niveau + 1.6).a * 1.6) * uFigureForce;
+  float vir = textureLod(uVirus, f, niveau).a * uVirusForce;
+  return max(max(s.r, s.g * 0.8), max(fig, vir));
+}
+
 float lueur(vec2 uv) {
   float s = 0.0;
   for (int k = 0; k < 8; k++) {
@@ -111,7 +119,7 @@ void main() {
   vec2 centre = (cellule + 0.5) / uGrille;
   vec2 echantillon = vec2(centre.x, 1.0 - centre.y);
 
-  vec4 source = texture(uSource, echantillon);
+  vec4 source = textureLod(uSource, echantillon, 0.0);
   float formes = source.r;
   float etoile = source.g;
   bool panneau = source.b > 0.5;
@@ -119,17 +127,30 @@ void main() {
   float h = hash(cellule);
   float h2 = hash(cellule + 17.3);
   vec2 pc = (cellule + 0.5) * uCellule;
-  float torche = uTorche * smoothstep(150.0, 30.0, length(pc - uSouris));
+  // Métaballe : le champ du curseur fusionne avec celui des formes proches,
+  // la tache s'étire vers elles et coule le long de leurs contours.
+  float dist = length(pc - uSouris);
+  float meta = 0.0;
+  if (uTorche > 0.0 && dist < 420.0) {
+    float curseur = exp(-dist * dist / 9800.0);
+    float proche = exp(-dist * dist / 64800.0);
+    float formesFloues = densite(echantillon, 2.0) * 0.55 + densite(echantillon, 3.5) * 0.75;
+    float ondule = sin(pc.x * 0.031 + uTemps * 1.4) * sin(pc.y * 0.027 - uTemps * 1.1) * 0.05;
+    meta = curseur + formesFloues * proche * 1.1 + ondule * step(0.05, curseur + proche * formesFloues);
+  }
+  float torche = uTorche * smoothstep(0.3, 0.38, meta);
+  float lisere = uTorche * exp(-pow((meta - 0.34) / 0.03, 2.0));
   float champ = step(h2, max(uChamp, torche)) * (0.5 + (h - 0.5) * 0.5 + (hash(cellule + floor(uTemps * 2.0 + h * 9.0)) - 0.5) * 0.12);
 
   float lum = max(formes, champ);
   lum *= 1.0 - uCreux * 0.8 * etoile;
   lum = mix(lum, 1.0, uAllumage * etoile);
+  lum += lisere * 0.55;
   if (panneau) lum = 0.0;
-  float survol = smoothstep(80.0, 0.0, length(pc - uSouris));
+  float survol = uTorche > 0.0 ? smoothstep(0.5, 0.75, meta) : smoothstep(80.0, 0.0, dist);
   lum += survol * 0.25 * step(0.05, lum);
 
-  vec4 virus = texture(uVirus, echantillon);
+  vec4 virus = textureLod(uVirus, echantillon, 0.0);
   bool estVirus = !panneau && virus.a * uVirusForce > 0.3 + 0.4 * h2;
   float lumVirus = clamp(virus.b / max(virus.a, 0.01), 0.0, 1.0);
 

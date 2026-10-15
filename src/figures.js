@@ -1,5 +1,5 @@
 import {
-  AnimationMixer, AnimationUtils, Fog, LinearFilter, LoopOnce,
+  AnimationMixer, AnimationUtils, Fog, LinearFilter, LinearMipmapLinearFilter, LoopOnce,
   MeshBasicMaterial, PerspectiveCamera, Scene, Vector3, WebGLRenderTarget,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -38,7 +38,7 @@ export function creerFigures() {
   const dessus = { position: new Vector3(0, 9.5, 8.5), cible: new Vector3(0, 0.4, 0) };
   const cible = new Vector3();
   const coin = new Vector3();
-  const rendu = new WebGLRenderTarget(1, 1, { minFilter: LinearFilter, magFilter: LinearFilter });
+  const rendu = new WebGLRenderTarget(1, 1, { minFilter: LinearMipmapLinearFilter, magFilter: LinearFilter, generateMipmaps: true });
   const marcheurs = [];
   let sujet = null;
   let taille = { l: 1, h: 1 };

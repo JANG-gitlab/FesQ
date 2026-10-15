@@ -49,7 +49,10 @@ renderer.setPixelRatio(ratio);
 const source = document.createElement('canvas');
 const halo = document.createElement('canvas');
 const affiche = document.createElement('canvas');
-const texSource = lineaire(new CanvasTexture(source));
+const texSource = new CanvasTexture(source);
+// Mipmaps : le flou des formes sert au contour organique de l'effet sous le curseur.
+texSource.minFilter = LinearMipmapLinearFilter;
+texSource.magFilter = LinearFilter;
 const texHalo = lineaire(new CanvasTexture(halo));
 const texAffiche = lineaire(new CanvasTexture(affiche));
 const figures = creerFigures();

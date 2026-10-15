@@ -1,5 +1,5 @@
 import {
-  CylinderGeometry, DirectionalLight, Group, HemisphereLight, IcosahedronGeometry, InstancedMesh, LinearFilter,
+  CylinderGeometry, DirectionalLight, Group, HemisphereLight, IcosahedronGeometry, InstancedMesh, LinearFilter, LinearMipmapLinearFilter,
   Matrix4, Mesh, MeshLambertMaterial, Object3D, PerspectiveCamera, Quaternion, Scene, SphereGeometry, Vector3,
   WebGLRenderTarget,
 } from 'three';
@@ -79,7 +79,7 @@ export function creerVirus() {
 
   const camera = new PerspectiveCamera(30, 1, 0.1, 20);
   camera.position.set(0, 0, 6.2);
-  const rendu = new WebGLRenderTarget(1, 1, { minFilter: LinearFilter, magFilter: LinearFilter });
+  const rendu = new WebGLRenderTarget(1, 1, { minFilter: LinearMipmapLinearFilter, magFilter: LinearFilter, generateMipmaps: true });
   const tampon = new Vector3();
   let taille = { l: 1, h: 1 };
 

@@ -406,6 +406,7 @@ function cible(x, y) {
 
 const initial = CHAPITRES.findIndex((c) => c.id === location.hash.slice(1));
 if (initial >= 0) defilement.placer(initial + 1.5);
+else defilement.lancer(1.5, 0.8);
 
 nav.forEach((a, i) => a.addEventListener('click', (e) => {
   e.preventDefault();

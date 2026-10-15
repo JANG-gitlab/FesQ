@@ -109,13 +109,10 @@ export function composer(ctx) {
     const invite = 1 - lisser(0.02, 0.1, p);
     if (invite > 0) {
       g.font = mono(13, 500);
-      const texte = 'FAITES DÉFILER POUR ÉTABLIR LA LIAISON';
-      const l = g.measureText(texte).width;
+      const texte = `ÉTABLISSEMENT DE LA LIAISON${'.'.repeat(Math.floor(t * 3) % 4)}`;
+      const l = g.measureText('ÉTABLISSEMENT DE LA LIAISON...').width;
       g.fillStyle = V(invite * (0.6 + 0.4 * (Math.floor(t * 2) % 2)));
       g.fillText(texte, W / 2 - l / 2, H * 0.78);
-      g.globalAlpha = invite;
-      dessinerIcone(g, 'bas', W / 2 - 12, H * 0.78 + 26 + Math.sin(t * 4) * 4, 24);
-      g.globalAlpha = 1;
     }
   }
 

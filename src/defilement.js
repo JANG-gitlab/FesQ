@@ -1,6 +1,7 @@
 const AVANCE_MAX = 0.3;
 const VITESSE_MAX = 0.32;
 const SENSIBILITE = 0.0011;
+const VITESSE_INTRO = 0.34;
 
 export function creerDefilement(etapes, { reduit }) {
   let position = 0;
@@ -8,9 +9,12 @@ export function creerDefilement(etapes, { reduit }) {
   let vitesse = 0;
   let saut = null;
   let toucher = null;
+  let intro = null;
 
   const pousser = (delta) => {
     saut = null;
+    // Remonter interrompt l'intro automatique ; descendre la laisse continuer.
+    if (delta < 0) intro = null;
     cible = Math.min(etapes, Math.max(0, Math.min(position + AVANCE_MAX, Math.max(position - AVANCE_MAX, cible + delta))));
   };
 
@@ -50,12 +54,28 @@ export function creerDefilement(etapes, { reduit }) {
       position = cible = Math.min(etapes, Math.max(0, etape));
     },
 
+    // Joue l'intro tout seul jusqu'à l'étape voulue, à vitesse constante.
+    lancer(fin, delai = 0) {
+      if (reduit) {
+        position = cible = fin;
+        return;
+      }
+      intro = { fin, delai };
+    },
+
     aller(etape) {
       saut = Math.min(etapes, Math.max(0, etape));
       if (reduit) position = cible = saut;
     },
 
     mettreAJour(dt) {
+      if (intro) {
+        intro.delai -= dt;
+        if (intro.delai <= 0) {
+          cible = Math.max(cible, Math.min(intro.fin, position + VITESSE_INTRO * dt));
+          if (position >= intro.fin - 0.001) intro = null;
+        }
+      }
       if (saut !== null) {
         cible = saut;
         if (Math.abs(position - saut) < 0.001) saut = null;

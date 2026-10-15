@@ -3,11 +3,11 @@ import { dessinerIcone } from './icones.js';
 export const CELLULE = { l: 6, h: 10 };
 
 export const CHAPITRES = [
-  { id: 'doxxing', icone: 'oeil', axe: [0, 1], texte: { x: 0.06, y: 0.5, l: 0.4 }, compact: { y: 0.1 }, visuel: { x: 0.2, y: 0 }, visuelCompact: { x: 0, y: 0.22 }, cadre: 'CAM_02 · COULOIR B · 03:12' },
-  { id: 'fuites', icone: 'foule', axe: [1, 0], texte: { x: 0.57, y: 0.13, l: 0.38 }, compact: { y: 0.56 }, visuel: { x: -0.2, y: 0 }, visuelCompact: { x: 0, y: -0.2 }, cadre: 'PLACE NORD · FLUX CONTINU' },
-  { id: 'virus', icone: 'insecte', axe: [-1, 0], texte: { x: 0.58, y: 0.48, l: 0.37 }, compact: { y: 0.1 }, visuel: { x: -0.21, y: 0 }, visuelCompact: { x: 0, y: 0.2 }, cadre: 'SPÉCIMEN Ω-7 · ×120 000' },
-  { id: 'racines', icone: 'arbre', axe: [0, -1], texte: { x: 0.06, y: 0.12, l: 0.38 }, compact: { y: 0.56 }, visuel: { x: 0.22, y: 0 }, visuelCompact: { x: 0, y: -0.2 }, cadre: 'COUPE · SOL / SOUS-SOL' },
-  { id: 'aide', icone: 'courrier', axe: [1, 0], texte: { x: 0.06, y: 0.28, l: 0.46 }, compact: { y: 0.1 }, visuel: { x: 0.24, y: 0 }, visuelCompact: { x: 0, y: 0.2 }, cadre: 'CANAL CHIFFRÉ · OUVERT' },
+  { id: 'doxxing', icone: 'oeil', axe: [0, 1], texte: { x: 0.06, y: 0.5, l: 0.4 }, compact: { y: 0.1 }, visuel: { x: 0.2, y: 0 }, visuelCompact: { x: 0, y: 0.22 }, cadre: 'CAM_02 · HALLWAY B · 03:12' },
+  { id: 'leaks', icone: 'foule', axe: [1, 0], texte: { x: 0.57, y: 0.13, l: 0.38 }, compact: { y: 0.56 }, visuel: { x: -0.2, y: 0 }, visuelCompact: { x: 0, y: -0.2 }, cadre: 'NORTH SQUARE · LIVE FEED' },
+  { id: 'virus', icone: 'insecte', axe: [-1, 0], texte: { x: 0.58, y: 0.48, l: 0.37 }, compact: { y: 0.1 }, visuel: { x: -0.21, y: 0 }, visuelCompact: { x: 0, y: 0.2 }, cadre: 'SPECIMEN Ω-7 · ×120,000' },
+  { id: 'roots', icone: 'arbre', axe: [0, -1], texte: { x: 0.06, y: 0.12, l: 0.38 }, compact: { y: 0.56 }, visuel: { x: 0.22, y: 0 }, visuelCompact: { x: 0, y: -0.2 }, cadre: 'CROSS-SECTION · GROUND / SUBSOIL' },
+  { id: 'help', icone: 'courrier', axe: [1, 0], texte: { x: 0.06, y: 0.28, l: 0.46 }, compact: { y: 0.1 }, visuel: { x: 0.24, y: 0 }, visuelCompact: { x: 0, y: 0.2 }, cadre: 'ENCRYPTED CHANNEL · OPEN' },
 ];
 
 const ICONES_SERVICES = ['cle', 'cadenas', 'oeil', 'bouclier'];
@@ -102,15 +102,15 @@ export function composer(ctx) {
   const intro = 1 - lisser(0.92, 1.05, p);
   if (intro > 0) {
     if (p < 0.3) {
-      ['VIGIE/OS 0.9', 'mem 640k ......... ok', 'crt 60hz ......... ok', 'pare-feu ......... actif', 'printf("*");'].forEach((ligne, i) => {
+      ['VIGIE/OS 0.9', 'mem 640k ......... ok', 'crt 60hz ......... ok', 'firewall ......... on', 'printf("*");'].forEach((ligne, i) => {
         ecrire(4, 3 + i, `■ ${ligne}`, 0.75, { toujours: 1 });
       });
     }
     const invite = 1 - lisser(0.02, 0.1, p);
     if (invite > 0) {
       g.font = mono(13, 500);
-      const texte = `ÉTABLISSEMENT DE LA LIAISON${'.'.repeat(Math.floor(t * 3) % 4)}`;
-      const l = g.measureText('ÉTABLISSEMENT DE LA LIAISON...').width;
+      const texte = `ESTABLISHING LINK${'.'.repeat(Math.floor(t * 3) % 4)}`;
+      const l = g.measureText('ESTABLISHING LINK...').width;
       g.fillStyle = V(invite * (0.6 + 0.4 * (Math.floor(t * 2) % 2)));
       g.fillText(texte, W / 2 - l / 2, H * 0.78);
     }
@@ -128,7 +128,7 @@ export function composer(ctx) {
   if (!compact) {
     g.font = mono(11);
     g.fillStyle = V(0.5);
-    g.fillText('prévention · dangers du numérique', 112, 21);
+    g.fillText('awareness · digital dangers', 112, 21);
   }
 
   const actif = Math.min(CHAPITRES.length - 1, Math.max(0, Math.floor(p - 1)));
@@ -156,7 +156,7 @@ export function composer(ctx) {
   });
 
   g.font = mono(11, 500);
-  const libelleSon = ctx.sonActif ? 'son actif' : 'son coupé';
+  const libelleSon = ctx.sonActif ? 'sound on' : 'sound off';
   const lSon = g.measureText(libelleSon).width;
   const xSon = W - 22 - lSon;
   const ySon = H - 34;
@@ -167,7 +167,7 @@ export function composer(ctx) {
 
   g.font = mono(10);
   g.fillStyle = V(0.5);
-  g.fillText(`${new Date().toLocaleTimeString('fr-FR')} · liaison chiffrée`, 22, H - 30);
+  g.fillText(`${new Date().toLocaleTimeString('en-GB')} · encrypted link`, 22, H - 30);
 
   CHAPITRES.forEach((cfg, c) => {
     const e = etatChapitre(c, p);
@@ -225,7 +225,7 @@ function grille(g, W, H, V, mono, compact, p) {
     g.font = mono(9, 500);
     g.fillStyle = V(0.45);
     const actif = Math.min(4, Math.max(0, Math.floor(p - 1)));
-    g.fillText(`VIGIE // SECTEUR ${String(actif + 1).padStart(2, '0')}/05 // ${CHAPITRES[actif].id.toUpperCase()} // NE PAS DIFFUSER`, 0, 0);
+    g.fillText(`VIGIE // SECTOR ${String(actif + 1).padStart(2, '0')}/05 // ${CHAPITRES[actif].id.toUpperCase()} // DO NOT DISTRIBUTE`, 0, 0);
     g.restore();
   }
 }
@@ -430,8 +430,8 @@ function visuels(ctx, { g, cfg, c, e, W, H, compact, mono, V, ecrire }) {
         }
       }
       let etiquette;
-      if (c === 0) etiquette = m.arret > 0 ? 'il vous a vu.' : `sujet_07 · non identifié · ${(0.6 + Math.sin(ctx.t * 2.3) * 0.05).toFixed(2)}`;
-      else etiquette = suspect ? `SIGNALÉ · id ${id}` : survole ? `id ${id} · signaler ?` : `id ${id}`;
+      if (c === 0) etiquette = m.arret > 0 ? 'he saw you.' : `subject_07 · unidentified · ${(0.6 + Math.sin(ctx.t * 2.3) * 0.05).toFixed(2)}`;
+      else etiquette = suspect ? `FLAGGED · id ${id}` : survole ? `id ${id} · flag?` : `id ${id}`;
       ecrire(c0, r0 - 1, etiquette, suspect && Math.floor(ctx.t * 3) % 2 ? 0.5 : force);
     }
   }
@@ -441,7 +441,7 @@ function visuels(ctx, { g, cfg, c, e, W, H, compact, mono, V, ecrire }) {
     const C1 = Math.ceil(W / CELLULE.l);
     const c0 = C1 - 6 - largeurLog;
     const r0 = 9;
-    ecrire(c0, r0 - 1, '> journal'.padEnd(largeurLog, '-'), 0.9);
+    ecrire(c0, r0 - 1, '> log'.padEnd(largeurLog, '-'), 0.9);
     ctx.logs.forEach((ligne, i) => ecrire(c0, r0 + i, ligne.slice(0, largeurLog), i === ctx.logs.length - 1 ? 1 : 0.5 + (i / ctx.logs.length) * 0.3));
   }
 }

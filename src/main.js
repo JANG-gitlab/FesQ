@@ -49,7 +49,10 @@ renderer.setPixelRatio(ratio);
 const source = document.createElement('canvas');
 const halo = document.createElement('canvas');
 const affiche = document.createElement('canvas');
-const texSource = lineaire(new CanvasTexture(source));
+const texSource = new CanvasTexture(source);
+// Mipmaps : le flou des formes sert au contour organique de l'effet sous le curseur.
+texSource.minFilter = LinearMipmapLinearFilter;
+texSource.magFilter = LinearFilter;
 const texHalo = lineaire(new CanvasTexture(halo));
 const texAffiche = lineaire(new CanvasTexture(affiche));
 const figures = creerFigures();
@@ -369,19 +372,19 @@ function redimensionner() {
 
 const IP = ['203.0.113.', '198.51.100.', '192.0.2.'];
 const EVENEMENTS = [
-  (ip) => `ssh   ${ip}  refusé`,
+  (ip) => `ssh   ${ip}  denied`,
   (ip) => `scan  ${ip}  ports 22,443,8080`,
-  () => `auth  admin@intranet  échec x3`,
-  (ip) => `dns   ${ip}  requête longue`,
-  () => `jeton expiré réutilisé  bloqué`,
+  () => `auth  admin@intranet  failed x3`,
+  (ip) => `dns   ${ip}  long query`,
+  () => `expired token reused  blocked`,
   (ip) => `sql   ${ip}  ' OR 1=1 --`,
-  () => `session 4f9a  pays inattendu`,
-  (ip) => `vpn   ${ip}  connexion 03:12`,
+  () => `session 4f9a  unexpected country`,
+  (ip) => `vpn   ${ip}  login 03:12`,
 ];
 
 function journaliser() {
   const ip = IP[Math.floor(Math.random() * IP.length)] + Math.floor(Math.random() * 254 + 1);
-  logs.push(`${new Date().toLocaleTimeString('fr-FR')}  ${EVENEMENTS[Math.floor(Math.random() * EVENEMENTS.length)](ip)}`);
+  logs.push(`${new Date().toLocaleTimeString('en-GB')}  ${EVENEMENTS[Math.floor(Math.random() * EVENEMENTS.length)](ip)}`);
   if (logs.length > 9) logs.shift();
 }
 
@@ -608,7 +611,7 @@ renderer.setAnimationLoop((ms) => {
     reperes: virus.reperes(),
     centreVirus: virus.centre(),
     solArbre: arbre.sol(),
-    compteurs: [null, `signalés : ${figures.suspects()}`, null, null, null],
+    compteurs: [null, `flagged: ${figures.suspects()}`, null, null, null],
   });
   texAffiche.needsUpdate = true;
   dessinerSource(mise.panneaux, etoile, p, t);

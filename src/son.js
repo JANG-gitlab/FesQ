@@ -110,13 +110,6 @@ export const son = {
     filtreDonnees.frequency.setTargetAtTime(600 + v * 2600, ctx.currentTime, 0.1);
   },
 
-  relais() {
-    if (!pret()) return;
-    const t = ctx.currentTime;
-    bruit(t, 0.012, 0.18, { frequence: 2500 });
-    osc('square', 90, t, 0.02, 0.03);
-  },
-
   impact() {
     if (!pret()) return;
     const t = ctx.currentTime;
@@ -179,6 +172,65 @@ export const son = {
     const t = ctx.currentTime;
     for (let i = 0; i < 5; i++) bruit(t + i * 0.025 + Math.random() * 0.02, 0.03, 0.14, { type: 'bandpass', frequence: 2000 + Math.random() * 5000, q: 1.5 });
     osc('sawtooth', 55, t, 0.5, 0.12, 30);
+  },
+
+  // Relâchement de l'étoile chargée : claquage, chute de tension, souffle et écho.
+  liberation(k) {
+    if (!pret()) return;
+    const t = ctx.currentTime;
+    const force = 0.5 + k * 0.5;
+
+    const echo = ctx.createDelay();
+    echo.delayTime.value = 0.14;
+    const retour = ctx.createGain();
+    retour.gain.value = 0.38;
+    const sombre = ctx.createBiquadFilter();
+    sombre.type = 'lowpass';
+    sombre.frequency.value = 1800;
+    echo.connect(sombre).connect(retour).connect(echo);
+    retour.connect(sortie);
+
+    // Claquage : arc électrique bref et large
+    bruit(t, 0.06, 0.45 * force, { type: 'highpass', frequence: 1200 });
+    for (let i = 0; i < 4; i++) bruit(t + 0.02 + i * 0.03 + Math.random() * 0.015, 0.025, 0.22 * force, { type: 'bandpass', frequence: 3000 + Math.random() * 4000, q: 2 });
+
+    // Chute de tension : dent de scie qui plonge, filtre qui se referme
+    const zap = ctx.createOscillator();
+    zap.type = 'sawtooth';
+    zap.frequency.setValueAtTime(1400 + k * 900, t);
+    zap.frequency.exponentialRampToValueAtTime(38, t + 0.55);
+    const ferme = ctx.createBiquadFilter();
+    ferme.type = 'lowpass';
+    ferme.Q.value = 9;
+    ferme.frequency.setValueAtTime(7000, t);
+    ferme.frequency.exponentialRampToValueAtTime(180, t + 0.6);
+    const g = gain(t, 0.003, 0.7, 0.2 * force);
+    zap.connect(ferme).connect(g);
+    g.connect(echo);
+    zap.start(t);
+    zap.stop(t + 0.75);
+
+    // Coup sourd
+    osc('sine', 110, t, 0.9, 0.55 * force, 26);
+
+    // Bourdonnement résiduel du circuit qui se vide
+    const ronfle = ctx.createOscillator();
+    ronfle.type = 'square';
+    ronfle.frequency.setValueAtTime(100, t + 0.1);
+    ronfle.frequency.linearRampToValueAtTime(50, t + 1.3);
+    const passe = ctx.createBiquadFilter();
+    passe.type = 'bandpass';
+    passe.frequency.value = 320;
+    passe.Q.value = 3;
+    ronfle.connect(passe).connect(gain(t + 0.1, 0.05, 1.3, 0.05 * force));
+    ronfle.start(t + 0.1);
+    ronfle.stop(t + 1.45);
+
+    // Grésillement qui s'éteint
+    for (let i = 0; i < 10; i++) {
+      const d = t + 0.25 + i * (0.05 + i * 0.012);
+      bruit(d, 0.012, 0.09 * force * (1 - i / 10), { type: 'bandpass', frequence: 2500 + Math.random() * 3000, q: 3 });
+    }
   },
 
   charge(k) {

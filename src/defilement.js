@@ -10,6 +10,7 @@ export function creerDefilement(etapes, { reduit }) {
   let saut = null;
   let toucher = null;
   let intro = null;
+  let bloque = false;
 
   const pousser = (delta) => {
     saut = null;
@@ -26,7 +27,7 @@ export function creerDefilement(etapes, { reduit }) {
 
   addEventListener('touchstart', (e) => { toucher = e.touches[0].clientY; }, { passive: true });
   addEventListener('touchmove', (e) => {
-    if (toucher === null) return;
+    if (toucher === null || bloque) return;
     const y = e.touches[0].clientY;
     pousser((toucher - y) * SENSIBILITE * 2.2);
     toucher = y;
@@ -48,6 +49,12 @@ export function creerDefilement(etapes, { reduit }) {
 
     get vitesse() {
       return vitesse;
+    },
+
+    // Pendant qu'on manipule un objet au doigt, le glisser ne fait pas défiler.
+    bloquer(oui) {
+      bloque = oui;
+      toucher = null;
     },
 
     placer(etape) {

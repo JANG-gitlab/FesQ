@@ -84,9 +84,9 @@ export function creerVirus() {
   let taille = { l: 1, h: 1 };
 
   const reperes = [
-    { local: points[11].clone().multiplyScalar(1.38), nom: 'PROTÉINE S', note: 'clé d’entrée dans la cellule' },
-    { local: new Vector3(0.62, -0.55, 0.56).normalize().multiplyScalar(1.0), nom: 'ENVELOPPE', note: 'membrane lipidique' },
-    { local: new Vector3(-0.35, -0.2, 0.92).normalize().multiplyScalar(0.5), nom: 'GÉNOME', note: 'instructions de copie' },
+    { local: points[11].clone().multiplyScalar(1.38), nom: 'PIÈCE JOINTE', note: 'sa porte d’entrée' },
+    { local: new Vector3(0.62, -0.55, 0.56).normalize().multiplyScalar(1.0), nom: 'CAMOUFLAGE', note: 'imite un fichier sûr' },
+    { local: new Vector3(-0.35, -0.2, 0.92).normalize().multiplyScalar(0.5), nom: 'CHARGE UTILE', note: 'vole et se recopie' },
   ];
 
   return {
@@ -100,12 +100,12 @@ export function creerVirus() {
       camera.updateProjectionMatrix();
     },
 
-    rendre(renderer, { visible, angle, echelle, decalageX, decalageY }) {
+    rendre(renderer, { visible, angle, echelle, decalageX, decalageY, inclinaison = 0, lacet = 0 }) {
       renderer.setRenderTarget(rendu);
       renderer.setClearColor(0x000000, 0);
       renderer.clear();
       if (visible) {
-        virus.rotation.set(0.35 + Math.sin(angle * 0.5) * 0.2, angle, 0.1);
+        virus.rotation.set(0.35 + Math.sin(angle * 0.5) * 0.2 + inclinaison, angle + lacet, 0.1);
         virus.scale.setScalar(echelle);
         camera.setViewOffset(taille.l, taille.h, -decalageX * taille.l, -decalageY * taille.h, taille.l, taille.h);
         renderer.render(scene, camera);
@@ -121,6 +121,14 @@ export function creerVirus() {
         tampon.project(camera);
         return { ...r, x: ((tampon.x + 1) / 2) * taille.l, y: ((1 - tampon.y) / 2) * taille.h, face };
       });
+    },
+
+    // Rayon apparent à l'écran, en pixels (pour savoir si le curseur le touche).
+    rayon() {
+      tampon.set(0, 0, 0).project(camera);
+      const x0 = tampon.x;
+      tampon.set(1.25 * virus.scale.x, 0, 0).project(camera);
+      return (Math.abs(tampon.x - x0) / 2) * taille.l;
     },
 
     centre() {

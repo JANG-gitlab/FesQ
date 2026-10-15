@@ -3,14 +3,14 @@ import { dessinerIcone } from './icones.js';
 export const CELLULE = { l: 6, h: 10 };
 
 export const CHAPITRES = [
-  { id: 'accueil', icone: 'oeil', axe: [0, 1], texte: { x: 0.06, y: 0.5, l: 0.4 }, compact: { y: 0.1 }, visuel: { x: 0.2, y: 0 }, visuelCompact: { x: 0, y: 0.22 }, cadre: 'CAM_02 · COULOIR B · 03:12' },
-  { id: 'surveillance', icone: 'foule', axe: [1, 0], texte: { x: 0.57, y: 0.13, l: 0.38 }, compact: { y: 0.56 }, visuel: { x: -0.2, y: 0 }, visuelCompact: { x: 0, y: -0.2 }, cadre: 'PLACE NORD · FLUX CONTINU' },
-  { id: 'mutation', icone: 'insecte', axe: [-1, 0], texte: { x: 0.58, y: 0.48, l: 0.37 }, compact: { y: 0.1 }, visuel: { x: -0.21, y: 0 }, visuelCompact: { x: 0, y: 0.2 }, cadre: 'SPÉCIMEN Ω-7 · ×120 000' },
+  { id: 'doxxing', icone: 'oeil', axe: [0, 1], texte: { x: 0.06, y: 0.5, l: 0.4 }, compact: { y: 0.1 }, visuel: { x: 0.2, y: 0 }, visuelCompact: { x: 0, y: 0.22 }, cadre: 'CAM_02 · COULOIR B · 03:12' },
+  { id: 'fuites', icone: 'foule', axe: [1, 0], texte: { x: 0.57, y: 0.13, l: 0.38 }, compact: { y: 0.56 }, visuel: { x: -0.2, y: 0 }, visuelCompact: { x: 0, y: -0.2 }, cadre: 'PLACE NORD · FLUX CONTINU' },
+  { id: 'virus', icone: 'insecte', axe: [-1, 0], texte: { x: 0.58, y: 0.48, l: 0.37 }, compact: { y: 0.1 }, visuel: { x: -0.21, y: 0 }, visuelCompact: { x: 0, y: 0.2 }, cadre: 'SPÉCIMEN Ω-7 · ×120 000' },
   { id: 'racines', icone: 'arbre', axe: [0, -1], texte: { x: 0.06, y: 0.12, l: 0.38 }, compact: { y: 0.56 }, visuel: { x: 0.22, y: 0 }, visuelCompact: { x: 0, y: -0.2 }, cadre: 'COUPE · SOL / SOUS-SOL' },
-  { id: 'contact', icone: 'courrier', axe: [1, 0], texte: { x: 0.06, y: 0.28, l: 0.46 }, compact: { y: 0.1 }, visuel: { x: 0.24, y: 0 }, visuelCompact: { x: 0, y: 0.2 }, cadre: 'CANAL CHIFFRÉ · OUVERT' },
+  { id: 'aide', icone: 'courrier', axe: [1, 0], texte: { x: 0.06, y: 0.28, l: 0.46 }, compact: { y: 0.1 }, visuel: { x: 0.24, y: 0 }, visuelCompact: { x: 0, y: 0.2 }, cadre: 'CANAL CHIFFRÉ · OUVERT' },
 ];
 
-const ICONES_SERVICES = ['loupe', 'cle', 'code', 'eclair'];
+const ICONES_SERVICES = ['cle', 'cadenas', 'oeil', 'bouclier'];
 const BRUIT = '#%&$@01<>/\\=+*';
 const sections = CHAPITRES.map((c) => document.getElementById(c.id));
 const nav = [...document.querySelectorAll('nav a')];
@@ -128,7 +128,7 @@ export function composer(ctx) {
   if (!compact) {
     g.font = mono(11);
     g.fillStyle = V(0.5);
-    g.fillText('développement sécurisé · défense applicative', 112, 21);
+    g.fillText('prévention · dangers du numérique', 112, 21);
   }
 
   const actif = Math.min(CHAPITRES.length - 1, Math.max(0, Math.floor(p - 1)));

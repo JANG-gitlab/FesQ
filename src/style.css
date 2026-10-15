@@ -17,6 +17,15 @@ html {
   background: #000;
 }
 
+html.saisissable {
+  cursor: grab;
+}
+
+html.saisi,
+html.saisi * {
+  cursor: grabbing;
+}
+
 html.vise {
   cursor: crosshair;
 }

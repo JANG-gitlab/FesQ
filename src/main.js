@@ -102,6 +102,7 @@ scene.add(new Mesh(
 ));
 
 const etat = { survolFigure: null, survolLien: 0, charge: 0, appui: false };
+const prise = { inclinaison: 0, lacet: 0, vi: 0, vl: 0, active: false, x: 0, y: 0, t: 0, survol: false };
 let grille = { C: -1, R: -1, donnees: null, texture: null };
 const logs = [];
 const eclairs = [];
@@ -394,6 +395,12 @@ function glitcher(duree) {
   gsap.fromTo(uniforms.uGlitch, { value: 1 }, { value: 0, duration: duree, ease: 'steps(3)' });
 }
 
+function surVirus(x, y) {
+  if (etatChapitre(2, defilement.position).presence < 0.5) return false;
+  const c = virus.centre();
+  return Math.hypot(x - c.x, y - c.y) < virus.rayon();
+}
+
 function cible(x, y) {
   const p = defilement.position;
   if (p < 1.2 || p > 2.85) return null;
@@ -419,6 +426,22 @@ addEventListener('pointermove', (e) => {
   uniforms.uTorche.value = e.pointerType === 'mouse' ? 0.9 : 0;
   const [x, y] = bomber(e.clientX / innerWidth, e.clientY / innerHeight);
   uniforms.uSouris.value.set(x * innerWidth, y * innerHeight);
+  if (prise.active) {
+    const t = performance.now() / 1000;
+    const dt = Math.max(0.008, t - prise.t);
+    const dx = e.clientX - prise.x;
+    const dy = e.clientY - prise.y;
+    prise.lacet += dx * 0.009;
+    prise.inclinaison += dy * 0.009;
+    prise.vl = (dx * 0.009) / dt;
+    prise.vi = (dy * 0.009) / dt;
+    prise.x = e.clientX;
+    prise.y = e.clientY;
+    prise.t = t;
+    return;
+  }
+  prise.survol = surVirus(x * innerWidth, y * innerHeight);
+  document.documentElement.classList.toggle('saisissable', prise.survol);
   const m = cible(x * innerWidth, y * innerHeight);
   if (m && m !== etat.survolFigure) son.survol();
   etat.survolFigure = m;
@@ -426,8 +449,17 @@ addEventListener('pointermove', (e) => {
 });
 document.documentElement.addEventListener('pointerleave', () => uniforms.uSouris.value.set(-1e4, -1e4));
 
-toile.addEventListener('pointerdown', () => {
+toile.addEventListener('pointerdown', (e) => {
   const p = defilement.position;
+  const [bx, by] = bomber(e.clientX / innerWidth, e.clientY / innerHeight);
+  if (surVirus(bx * innerWidth, by * innerHeight)) {
+    Object.assign(prise, { active: true, x: e.clientX, y: e.clientY, t: performance.now() / 1000, vi: 0, vl: 0 });
+    toile.setPointerCapture(e.pointerId);
+    defilement.bloquer(true);
+    document.documentElement.classList.add('saisi');
+    son.verrou();
+    return;
+  }
   if (etat.survolFigure && p < 2) {
     if (figures.regarder(etat.survolFigure)) {
       son.sonar();
@@ -439,7 +471,17 @@ toile.addEventListener('pointerdown', () => {
     etat.appui = true;
   }
 });
+function lacher() {
+  if (!prise.active) return;
+  prise.active = false;
+  // Un lâcher après une pause ne relance pas le virus.
+  if (performance.now() / 1000 - prise.t > 0.08) prise.vi = prise.vl = 0;
+  defilement.bloquer(false);
+  document.documentElement.classList.remove('saisi');
+}
+addEventListener('pointercancel', lacher);
 addEventListener('pointerup', () => {
+  lacher();
   if (!etat.appui) return;
   etat.appui = false;
   if (etat.charge > 0.3) {
@@ -523,6 +565,13 @@ renderer.setAnimationLoop((ms) => {
   const d1 = decalageVisuel(1, p, false);
   figures.mettreAJour(renderer, dt, p, { decalageX: d0.x + (d1.x - d0.x) * k, decalageY: d0.y + (d1.y - d0.y) * k, anime: !reduit });
 
+  if (!prise.active) {
+    prise.lacet += prise.vl * dt;
+    prise.inclinaison += prise.vi * dt;
+    const frein = Math.exp(-dt * 2.2);
+    prise.vl *= frein;
+    prise.vi *= frein;
+  }
   const dv = decalageVisuel(2, p);
   uniforms.uVirusForce.value = dv.e.presence;
   virus.rendre(renderer, {
@@ -531,6 +580,8 @@ renderer.setAnimationLoop((ms) => {
     echelle: (0.5 + 0.4 * lisser(3.0, 3.45, p)) * (1 + 0.35 * lisser(3.6, 4.0, p)),
     decalageX: dv.x,
     decalageY: dv.y,
+    inclinaison: prise.inclinaison,
+    lacet: prise.lacet,
   });
 
   const etoile = etoileCourante(p);
